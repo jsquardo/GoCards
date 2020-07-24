@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 // Create a new type of 'deck'
@@ -32,18 +34,22 @@ func (d deck) print() {
 	}
 }
 
+// Returns two decks from one deck
 func deal(d deck, handSize int) (deck, deck) {
 	return d[:handSize], d[handSize:]
 }
 
+// Makes the deck into a string
 func (d deck) toString() string {
 	return strings.Join([]string(d), ",")
 }
 
+// takes the deck and saves it into a file
 func (d deck) saveToFile(filename string) error {
 	return ioutil.WriteFile(filename, []byte(d.toString()), 0666)
 }
 
+// Loads the file from local storage
 func newDeckFromFile(filename string) deck {
 	bs, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -52,4 +58,20 @@ func newDeckFromFile(filename string) deck {
 	}
 	s := strings.Split(string(bs), ",")
 	return deck(s)
+}
+
+// Shuffle func that shuffles the deck
+func (d deck) shuffle() {
+	// Using the math/rand and time/UnixNano to generate
+	// a random num everytime.
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
+	// Loop through the deck range and swap index
+	// based on the random number.
+	for i := range d {
+		newPosition := r.Intn(len(d) - 1)
+
+		d[i], d[newPosition] = d[newPosition], d[i]
+	}
 }
